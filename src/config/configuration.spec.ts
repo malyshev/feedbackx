@@ -61,7 +61,7 @@ describe('Configuration', () => {
                 NODE_ENV: 'development',
                 LOG_LEVEL: 'warn',
                 LOG_PRETTY: 'false',
-                PORT: '8080',
+                APP_PORT: '8080',
                 APP_NAME: 'custom-app',
             });
             const config = configuration(configService) as unknown as AppConfig;

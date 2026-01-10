@@ -16,8 +16,9 @@ export const testConfig = (configService: ConfigService): Partial<AppConfig> =>
             // Test port - different from development to avoid conflicts
             // Default: 3001 (dev uses 3000)
             // Change if port 3001 is in use or you need multiple test instances
+            // Override via APP_PORT environment variable (same variable as development)
             // ConfigService automatically converts string env vars to numbers when type is specified
-            port: configService.get<number>('PORT', 3001),
+            port: configService.get<number>('APP_PORT', 3001),
 
             // Test app name - distinguishes test instance in logs
             // Useful when running tests alongside development server
