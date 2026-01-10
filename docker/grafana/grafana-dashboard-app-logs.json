@@ -1,8 +1,8 @@
 {
   "id": null,
-  "uid": "app-logs",
-  "title": "Application Logs",
-  "tags": ["application", "logs", "nestjs"],
+  "uid": "feedbackx-logs",
+  "title": "FeedbackX Application Logs",
+  "tags": ["feedbackx", "application", "logs"],
   "timezone": "browser",
   "schemaVersion": 36,
   "version": 1,
@@ -20,17 +20,17 @@
       "datasource": { "type": "loki", "uid": "Loki" },
       "targets": [
         {
-          "expr": "sum(count_over_time({service=\"app\"} | json | level=30 [5m]))",
+          "expr": "sum(count_over_time({service=\"feedbackx\"} | json | level=30 [5m]))",
           "legendFormat": "Info",
           "refId": "A"
         },
         {
-          "expr": "sum(count_over_time({service=\"app\"} | json | level=40 [5m]))",
+          "expr": "sum(count_over_time({service=\"feedbackx\"} | json | level=40 [5m]))",
           "legendFormat": "Warn",
           "refId": "B"
         },
         {
-          "expr": "sum(count_over_time({service=\"app\"} | json | level=50 [5m]))",
+          "expr": "sum(count_over_time({service=\"feedbackx\"} | json | level=50 [5m]))",
           "legendFormat": "Error",
           "refId": "C"
         }
@@ -66,7 +66,7 @@
       "datasource": { "type": "loki", "uid": "Loki" },
       "targets": [
         {
-          "expr": "{service=\"app\"} | json | level>=40 ${search:raw}",
+          "expr": "{service=\"feedbackx\"} | json | level>=40 ${search:raw}",
           "refId": "A"
         }
       ],
@@ -90,7 +90,7 @@
       "datasource": { "type": "loki", "uid": "Loki" },
       "targets": [
         {
-          "expr": "{service=\"app\"} | json | level=~\"$logLevel\" ${search:raw}",
+          "expr": "{service=\"feedbackx\"} | json | level=~\"$logLevel\" ${search:raw}",
           "refId": "A"
         }
       ],

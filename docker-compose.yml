@@ -1,81 +1,225 @@
+# Docker Compose configuration for FeedbackX
+#
+# Requirements:
+# - Docker Compose v2+ (or Docker Compose file format 3.9+)
+# - Configs feature is used for pgAdmin auto-configuration
+#
+# Development/Preview Setup:
+# - Fully isolated network - only FeedbackX API, Grafana, and pgAdmin are exposed externally
+# - PostgreSQL and Loki are internal-only (accessible via service names within Docker network)
+# - FeedbackX API connects to PostgreSQL using service name 'postgres'
+# - Grafana connects to Loki using service name 'loki'
+# - Promtail is always internal-only (no external access needed)
+# - FeedbackX API configuration is loaded from .env file (copy .env-example to .env and configure)
+#
+# Configuration & Security:
+# - Create .env file from .env-example: cp .env-example .env
+# - .env file MUST be in .gitignore (already configured) - never commit sensitive values
+# - FeedbackX API container uses env_file to load all configuration from .env
+# - Docker-specific overrides (DB_HOST, NO_COLOR) are set in environment section
+# - All application config (PORT, NODE_ENV, DB_*, etc.) comes from .env file
+# - Sensitive values (passwords, secrets) should only be in .env, never in .env-example
+#
+# Production Deployment:
+# - This docker-compose.yml is provided as a development/demo example
+# - For production, configure networking according to your infrastructure needs:
+#   - Use orchestration platforms (Kubernetes, Docker Swarm, etc.) with proper networking
+#   - Use proper secrets management (Kubernetes secrets, Docker secrets, AWS Secrets Manager, etc.)
+#   - Configure security groups, firewalls, and service mesh as needed
+#   - Use managed databases and monitoring services when appropriate
+#   - Follow your organization's infrastructure and security policies
+#
+# To expose PostgreSQL or Loki ports for external access, uncomment the ports sections
+# below or use docker-compose.override.yml for local development overrides
+
 services:
-  # NestJS application
-  app:
+  # PostgreSQL database (internal only - accessible via feedbackx-network)
+  # FeedbackX API connects using service name 'postgres' - no external port needed
+  # To expose PostgreSQL port for external tools, uncomment the ports section below
+  postgres:
+    image: postgres:16.3
+    container_name: feedbackx-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_DB=${DB_DATABASE:-feedbackx}
+    volumes:
+      - feedbackx-postgres-data:/var/lib/postgresql/data
+    # Expose PostgreSQL port only if explicitly needed (for external database tools)
+    # Default: internal only for better security isolation
+    # To expose PostgreSQL port, uncomment the ports section below:
+    # ports:
+    #   - "${DB_PORT:-5432}:5432"
+    networks:
+      - feedbackx-network
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', '${DB_USERNAME:-postgres}']
+      interval: 5s
+      retries: 5
+      start_period: 10s
+      timeout: 3s
+
+  # pgAdmin - PostgreSQL administration tool (development/demo only)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: feedbackx-pgadmin
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@example.com}
+      - PGADMIN_DEFAULT_PASSWORD=${DB_PASSWORD:-postgres}
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+    entrypoint: /bin/sh -c "chmod 600 /pgpass; /entrypoint.sh"
+    volumes:
+      - feedbackx-pgadmin-data:/var/lib/pgadmin
+    ports:
+      - '${PGADMIN_PORT:-5050}:80'
+    networks:
+      - feedbackx-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    configs:
+      - source: pgpass
+        target: /pgpass
+      - source: servers.json
+        target: /pgadmin4/servers.json
+
+  # FeedbackX API application
+  feedbackx:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: nestjs-app
+    container_name: feedbackx
     restart: unless-stopped
+    # Load application configuration from .env file
+    # Security: .env file should NOT be committed to version control (must be in .gitignore)
+    # Sensitive values (passwords, secrets) should only be in .env, never in .env-example
+    # For production, use proper secrets management (Kubernetes secrets, Docker secrets, etc.)
+    env_file:
+      - .env
+    # Override Docker Compose-specific values (these override values from .env)
+    # Variables defined here take precedence over values from env_file
     environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - LOG_PRETTY=false # Structured JSON for Loki
-      - LOG_LEVEL=info
-      - NO_COLOR=1 # Disable color codes in output
+      # Always use Docker service name for database host (internal networking)
+      # This overrides DB_HOST from .env to use Docker internal networking
+      # For local development, .env may have DB_HOST=localhost, but in Docker use service name
+      - DB_HOST=postgres
+      # Docker-specific: disable color codes in container output for better log parsing
+      - NO_COLOR=1
+      # Docker-specific: use structured JSON logs (required for Loki/Promtail integration)
+      # This ensures logs are parsed correctly by Promtail and displayed in Grafana
+      # Override in .env if needed, but structured JSON is recommended for Docker deployments
+      - LOG_PRETTY=false
     ports:
-      - '3000:3000'
+      - '${APP_PORT:-3000}:3000'
     networks:
-      - monitoring
+      - feedbackx-network
+    depends_on:
+      postgres:
+        condition: service_healthy
     # Write logs to stdout (Pino does this by default)
     # Promtail will read them from the Docker socket
     labels:
       - 'promtail.scrape=true' # Tell Promtail to collect logs from this container
 
-  # Loki - log aggregation and indexing
+  # Loki - log aggregation and indexing (internal only - accessible via feedbackx-network)
+  # Grafana connects using service name 'loki' - no external port needed
+  # To expose Loki API port, uncomment the ports section below
   loki:
     image: grafana/loki:2.9.3
-    container_name: loki
-    ports:
-      - '3100:3100'
+    container_name: feedbackx-loki
+    # Expose Loki API port only if explicitly needed (for external query tools)
+    # Default: internal only for better security isolation
+    # To expose Loki port, uncomment the ports section below:
+    # ports:
+    #   - '3100:3100'
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
-      - loki-data:/loki
+      - feedbackx-loki-data:/loki
     networks:
-      - monitoring
+      - feedbackx-network
     restart: unless-stopped
 
-  # Promtail - log collection agent
+  # Promtail - log collection agent (internal only, no external ports)
   promtail:
     image: grafana/promtail:2.9.3
-    container_name: promtail
+    container_name: feedbackx-promtail
     volumes:
       - ./docker/promtail/config.yml:/etc/promtail/config.yml:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # Mount app logs directory if logging to files
-      # - ./logs:/var/log/app:ro
+      # Mount application logs directory if logging to files
+      # - ./logs:/var/log/feedbackx:ro
     command: -config.file=/etc/promtail/config.yml
     depends_on:
       - loki
     networks:
-      - monitoring
+      - feedbackx-network
     restart: unless-stopped
 
   # Grafana - visualization
   grafana:
     image: grafana/grafana:10.2.3
-    container_name: grafana
+    container_name: feedbackx-grafana
     ports:
-      - '3001:3000'
+      - '${GRAFANA_PORT:-3001}:3000'
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
-      - grafana-data:/var/lib/grafana
+      - feedbackx-grafana-data:/var/lib/grafana
       - ./docker/grafana/grafana-datasource.yml:/etc/grafana/provisioning/datasources/loki.yml:ro
       - ./docker/grafana/grafana-dashboard-provider.yml:/etc/grafana/provisioning/dashboards/default.yml:ro
       - ./docker/grafana/grafana-dashboard-app-logs.json:/etc/grafana/provisioning/dashboards/app-logs.json:ro
     depends_on:
       - loki
     networks:
-      - monitoring
+      - feedbackx-network
     restart: unless-stopped
 
 volumes:
-  loki-data:
-  grafana-data:
+  feedbackx-loki-data:
+  feedbackx-grafana-data:
+  feedbackx-postgres-data:
+  feedbackx-pgadmin-data:
 
 networks:
-  monitoring:
+  # Isolated network for FeedbackX services
+  # Services can communicate internally using service names (e.g., 'postgres', 'loki')
+  # Only explicitly exposed ports are accessible from the host
+  # For production, configure networking according to your infrastructure needs
+  feedbackx-network:
     driver: bridge
+
+configs:
+  pgpass:
+    content: postgres:${DB_PORT:-5432}:*:${DB_USERNAME:-postgres}:${DB_PASSWORD:-postgres}
+  servers.json:
+    content: |
+      {
+        "Servers": {
+          "1": {
+            "Name": "FeedbackX PostgreSQL Server",
+            "Group": "FeedbackX",
+            "Host": "postgres",
+            "Port": 5432,
+            "MaintenanceDB": "${DB_DATABASE:-feedbackx}",
+            "PassFile": "/pgpass",
+            "SSLMode": "prefer",
+            "Username": "${DB_USERNAME:-postgres}",
+            "UseSSHTunnel": 0,
+            "TunnelPort": "22",
+            "TunnelAuthentication": 0,
+            "KerberosAuthentication": false,
+            "ConnectionParameters": {
+              "sslmode": "prefer",
+              "connect_timeout": 10,
+              "sslcert": "<STORAGE_DIR>/.postgresql/postgresql.crt",
+              "sslkey": "<STORAGE_DIR>/.postgresql/postgresql.key"
+            }
+          }
+        }
+      }
