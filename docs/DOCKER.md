@@ -55,7 +55,7 @@ Override specific environment variables:
 ```shell
 docker run --rm -p 3000:3000 \
   -e NODE_ENV=production \
-  -e PORT=8080 \
+  -e APP_PORT=3000 \
   -e ALLOWED_ORIGINS="https://yourdomain.com,https://app.yourdomain.com" \
   -e THROTTLE_LIMIT=200 \
   -e THROTTLE_TTL=30000 \
@@ -88,7 +88,7 @@ All security features work correctly in Docker with the default production setti
 See [`.env-example`](../.env-example) for all available environment variables:
 
 - `NODE_ENV` - Application environment (development, production, test)
-- `PORT` - Application port (default: 3000)
+- `APP_PORT` - Application port (default: 3000) - using APP_PORT instead of PORT to avoid conflicts with Docker/system variables
 - `ALLOWED_ORIGINS` - CORS allowed origins (comma-separated)
 - `THROTTLE_TTL` - Rate limit time window in milliseconds
 - `THROTTLE_LIMIT` - Maximum requests per time window

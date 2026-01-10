@@ -118,7 +118,7 @@ The server starts with:
 ### Start with Custom Port
 
 ```shell
-PORT=8080 npm run start:dev
+APP_PORT=8080 npm run start:dev
 ```
 
 ### Start in Production Mode
@@ -143,7 +143,7 @@ cp .env-example .env
 
 # Edit with your values
 NODE_ENV=development
-PORT=3000
+APP_PORT=3000
 ```
 
 Environment variables are loaded automatically via NestJS ConfigModule.

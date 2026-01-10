@@ -55,7 +55,7 @@ Configuration is managed via environment variables:
 
 ```bash
 # Server
-PORT=3000
+APP_PORT=3000
 NODE_ENV=development
 
 # CORS

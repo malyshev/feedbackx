@@ -202,7 +202,7 @@ See [`.env-example`](../.env-example) for all available environment variables.
 Key variables:
 
 - `NODE_ENV` - Application environment (development, production, test)
-- `PORT` - Application port (default: 3000)
+- `APP_PORT` - Application port (default: 3000) - using APP_PORT instead of PORT to avoid conflicts with Docker/system variables
 - `APP_NAME` - Application name (default: 'nestjs-app')
 - `ALLOWED_ORIGINS` - CORS origins (comma-separated, required in production)
 - `CORS_CREDENTIALS` - Allow credentials in CORS requests (true/false, default: false)
@@ -231,7 +231,7 @@ You can extend the configuration system to add your own settings (external servi
 
 **Important**: NestJS `ConfigService.get<T>()` automatically handles type conversion. You don't need `parseInt()`, `parseFloat()`, or string-to-boolean parsing. Just specify the type as a generic parameter:
 
-- `configService.get<number>('PORT', 3000)` - automatically converts string env vars to numbers
+- `configService.get<number>('APP_PORT', 3000)` - automatically converts string env vars to numbers
 - `configService.get<boolean>('FEATURE_FLAG', false)` - automatically converts 'true'/'false'/'1'/'0' to booleans
 - `configService.get<string>('APP_NAME', 'default')` - returns strings as-is
 
@@ -350,9 +350,9 @@ export class PaymentService {
 ### Tips
 
 - **Use type generics, not manual parsing**: ConfigService automatically handles type conversion
-  - ✅ `configService.get<number>('PORT', 3000)` - automatic string-to-number conversion
+  - ✅ `configService.get<number>('APP_PORT', 3000)` - automatic string-to-number conversion
   - ✅ `configService.get<boolean>('FEATURE_FLAG', false)` - automatic string-to-boolean conversion
-  - ❌ Don't use `parseInt(configService.get<string>('PORT', '3000'), 10)` - it's unnecessary
+  - ❌ Don't use `parseInt(configService.get<string>('APP_PORT', '3000'), 10)` - it's unnecessary
 - Use `configService.getOrThrow()` for required values (app fails fast if missing)
 - Use `configService.get()` with defaults for optional values
 - Add comments explaining what each setting does and why (following Laravel's approach)
