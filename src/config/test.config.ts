@@ -45,4 +45,14 @@ export const testConfig = (configService: ConfigService): Partial<AppConfig> =>
             // Enable if you want to test HSTS behavior: hsts: { maxAge: 31536000, includeSubDomains: true, preload: true }
             hsts: false, // Disable HSTS in tests
         },
+        database: {
+            // Enable auto-synchronize in tests - automatically syncs test database schema
+            // Tests typically use in-memory or temporary databases that can be recreated
+            // Auto-sync simplifies test setup without manual migrations
+            // Override via DB_SYNCHRONIZE environment variable if you want to test migrations
+            // Explicitly convert string to boolean - env vars are strings ("true"/"false")
+            // ConfigService.get<boolean> doesn't always handle string conversion correctly
+            // Default to true for tests (auto-sync enabled for convenience)
+            synchronize: configService.get<string>('DB_SYNCHRONIZE', 'true') === 'true',
+        },
     }) as Partial<AppConfig>;

@@ -92,5 +92,16 @@ export const productionConfig = (configService: ConfigService): Partial<AppConfi
             // ConfigService.get<boolean> doesn't always handle string conversion correctly
             prettyPrint: configService.get<string>('LOG_PRETTY', 'false') === 'true',
         },
+        database: {
+            // DISABLE auto-synchronize in production - ALWAYS use migrations instead
+            // Auto-synchronize can cause data loss, schema corruption, and downtime
+            // Production databases must use controlled migrations for schema changes
+            // This setting is a safety measure - should always be false in production
+            // Override via DB_SYNCHRONIZE environment variable (but strongly discouraged)
+            // Explicitly convert string to boolean - env vars are strings ("true"/"false")
+            // ConfigService.get<boolean> doesn't always handle string conversion correctly
+            // Default to false for production (use migrations, not auto-sync)
+            synchronize: configService.get<string>('DB_SYNCHRONIZE', 'false') === 'true',
+        },
     } as Partial<AppConfig>;
 };

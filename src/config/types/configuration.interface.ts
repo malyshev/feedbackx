@@ -16,6 +16,8 @@ export interface AppConfig {
         port: number;
         /** Application name */
         name: string;
+        /** Admin secret key - used for admin authentication and secure operations */
+        adminSecret: string | undefined;
     };
 
     /**
@@ -85,6 +87,35 @@ export interface AppConfig {
         level: string;
         /** Enable pretty printing (development only - use structured JSON in production) */
         prettyPrint: boolean;
+    };
+
+    /**
+     * Database configuration
+     * PostgreSQL database connection settings and pool configuration
+     */
+    database: {
+        /** Database host */
+        host: string;
+        /** Database port */
+        port: number;
+        /** Database username */
+        username: string;
+        /** Database password */
+        password: string;
+        /** Database name */
+        database: string;
+        /** Auto-synchronize database schema (WARNING: only use in development, never in production) */
+        synchronize: boolean;
+        /** Connection pool maximum connections */
+        poolMax: number;
+        /** Connection pool minimum connections */
+        poolMin: number;
+        /** Connection pool idle timeout in milliseconds */
+        poolIdleTimeout: number;
+        /** Connection pool connection timeout in milliseconds */
+        poolConnectionTimeout: number;
+        /** Query timeout in milliseconds */
+        queryTimeout: number;
     };
 }
 

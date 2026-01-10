@@ -29,6 +29,15 @@ export const defaultConfig = (configService: ConfigService): AppConfig => ({
         // Override via APP_NAME environment variable
         // Useful for distinguishing multiple services in distributed systems
         name: configService.get<string>('APP_NAME', 'nestjs-app'),
+
+        // Admin secret key - used for admin authentication and secure operations
+        // Default: undefined (must be provided via ADMIN_SECRET environment variable)
+        // Generate a strong secret using: openssl rand -hex 32
+        // Security: MUST be set in production - never commit secrets to version control
+        // Use different secrets for each environment (development, staging, production)
+        // Example: ADMIN_SECRET=a1b2c3d4e5f6... npm run start:dev
+        // Security consideration: Minimum 32 characters recommended for production
+        adminSecret: configService.get<string>('ADMIN_SECRET'),
     },
     cors: {
         // Allow credentials (cookies, authorization headers) - set to false by default for security
@@ -195,5 +204,101 @@ export const defaultConfig = (configService: ConfigService): AppConfig => ({
         // Explicitly convert string to boolean - env vars are strings ("true"/"false")
         // ConfigService.get<boolean> doesn't always handle string conversion correctly
         prettyPrint: configService.get<string>('LOG_PRETTY', 'false') === 'true',
+    },
+    database: {
+        // Database host - PostgreSQL server hostname or IP address
+        // Default: 'localhost' - standard for local development
+        // Override via DB_HOST environment variable for different hosts
+        // Docker: Use 'host.docker.internal' to access host machine from container
+        // Example: DB_HOST=postgres.example.com
+        host: configService.get<string>('DB_HOST', 'localhost'),
+
+        // Database port - PostgreSQL server port
+        // Default: 5432 - standard PostgreSQL port
+        // Override via DB_PORT environment variable if using non-standard port
+        // Example: DB_PORT=5433
+        // ConfigService automatically converts string env vars to numbers when type is specified
+        port: configService.get<number>('DB_PORT', 5432),
+
+        // Database username - PostgreSQL user for authentication
+        // Default: 'postgres' - standard default PostgreSQL user
+        // Override via DB_USERNAME environment variable
+        // Example: DB_USERNAME=myapp_user
+        username: configService.get<string>('DB_USERNAME', 'postgres'),
+
+        // Database password - PostgreSQL user password
+        // Default: 'postgres' - CHANGE THIS IN PRODUCTION
+        // Override via DB_PASSWORD environment variable
+        // Security: MUST be set in production - never commit passwords to version control
+        // Example: DB_PASSWORD=secure-password-123
+        password: configService.get<string>('DB_PASSWORD', 'postgres'),
+
+        // Database name - name of the PostgreSQL database to connect to
+        // Default: 'nestjs-app' - change to match your application
+        // Override via DB_DATABASE environment variable
+        // Example: DB_DATABASE=feedbackx
+        database: configService.get<string>('DB_DATABASE', 'nestjs-app'),
+
+        // Auto-synchronize database schema - automatically syncs entity changes to database
+        // WARNING: Should be false in production - only use in development/test
+        // When true: Automatically creates/updates/drops tables based on entity definitions
+        // When false: Requires manual migrations (recommended for production)
+        // Default: false - safe default, should be overridden per environment
+        // Override via DB_SYNCHRONIZE environment variable (true/false)
+        // Development: true for rapid development (auto-sync changes)
+        // Production: ALWAYS false - use migrations instead to prevent data loss
+        // Explicitly convert string to boolean - env vars are strings ("true"/"false")
+        // ConfigService.get<boolean> doesn't always handle string conversion correctly
+        synchronize: configService.get<string>('DB_SYNCHRONIZE', 'false') === 'true',
+
+        // Connection pool maximum connections - maximum number of connections in the pool
+        // Default: 20 - good balance for most applications
+        // Override via DB_POOL_MAX environment variable
+        // Tune based on:
+        //   - Database server capacity (check PostgreSQL max_connections setting)
+        //   - Application load (more concurrent requests = higher pool size)
+        //   - Available memory (each connection uses memory)
+        // Example: DB_POOL_MAX=50 for high-traffic applications
+        // ConfigService automatically converts string env vars to numbers when type is specified
+        poolMax: configService.get<number>('DB_POOL_MAX', 20),
+
+        // Connection pool minimum connections - minimum number of connections to maintain
+        // Default: 5 - keeps warm connections ready for faster response
+        // Override via DB_POOL_MIN environment variable
+        // Higher values = faster initial queries (connections already open)
+        // Lower values = less resource usage (fewer idle connections)
+        // Example: DB_POOL_MIN=10 for high-traffic applications
+        // ConfigService automatically converts string env vars to numbers when type is specified
+        poolMin: configService.get<number>('DB_POOL_MIN', 5),
+
+        // Connection pool idle timeout - time in milliseconds before closing idle connections
+        // Default: 30000ms = 30 seconds
+        // Override via DB_POOL_IDLE_TIMEOUT environment variable
+        // Idle connections are closed after this timeout to free resources
+        // Increase for applications with periodic bursts (keeps connections longer)
+        // Decrease for applications with steady traffic (releases connections faster)
+        // Example: DB_POOL_IDLE_TIMEOUT=60000 (1 minute)
+        // ConfigService automatically converts string env vars to numbers when type is specified
+        poolIdleTimeout: configService.get<number>('DB_POOL_IDLE_TIMEOUT', 30000),
+
+        // Connection pool connection timeout - time in milliseconds to wait for new connection
+        // Default: 10000ms = 10 seconds
+        // Override via DB_POOL_CONNECTION_TIMEOUT environment variable
+        // Throws error if connection cannot be established within this time
+        // Increase if database is slow to respond (network latency, overloaded DB)
+        // Decrease to fail fast if database is unreachable
+        // Example: DB_POOL_CONNECTION_TIMEOUT=20000 (20 seconds)
+        // ConfigService automatically converts string env vars to numbers when type is specified
+        poolConnectionTimeout: configService.get<number>('DB_POOL_CONNECTION_TIMEOUT', 10000),
+
+        // Query timeout - time in milliseconds before query times out
+        // Default: 30000ms = 30 seconds
+        // Override via DB_QUERY_TIMEOUT environment variable
+        // Prevents long-running queries from blocking the application
+        // Increase for complex analytical queries or bulk operations
+        // Decrease for fast OLTP workloads (fail fast on slow queries)
+        // Example: DB_QUERY_TIMEOUT=60000 (1 minute) for reporting queries
+        // ConfigService automatically converts string env vars to numbers when type is specified
+        queryTimeout: configService.get<number>('DB_QUERY_TIMEOUT', 30000),
     },
 });

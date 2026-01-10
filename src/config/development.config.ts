@@ -62,5 +62,16 @@ export const developmentConfig = (configService: ConfigService): Partial<AppConf
             // Default to true for development (pretty print enabled)
             prettyPrint: configService.get<string>('LOG_PRETTY', 'true') === 'true',
         },
+        database: {
+            // Enable auto-synchronize in development - automatically syncs entity changes to database
+            // This allows rapid development without manual migrations
+            // Changes to entity definitions are automatically reflected in the database
+            // WARNING: This can cause data loss if not careful with entity changes
+            // Override via DB_SYNCHRONIZE environment variable if you want to use migrations in development
+            // Explicitly convert string to boolean - env vars are strings ("true"/"false")
+            // ConfigService.get<boolean> doesn't always handle string conversion correctly
+            // Default to true for development (auto-sync enabled for convenience)
+            synchronize: configService.get<string>('DB_SYNCHRONIZE', 'true') === 'true',
+        },
     } as Partial<AppConfig>;
 };
