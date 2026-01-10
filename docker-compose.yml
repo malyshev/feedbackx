@@ -49,8 +49,8 @@ services:
     # Expose PostgreSQL port only if explicitly needed (for external database tools)
     # Default: internal only for better security isolation
     # To expose PostgreSQL port, uncomment the ports section below:
-    # ports:
-    #   - "${DB_PORT:-5432}:5432"
+    ports:
+      - '${DB_PORT:-5432}:5432'
     networks:
       - feedbackx-network
     healthcheck:
@@ -74,7 +74,7 @@ services:
     volumes:
       - feedbackx-pgadmin-data:/var/lib/pgadmin
     ports:
-      - '${PGADMIN_PORT:-5050}:80'
+      - '${PGADMIN_FORWARD_PORT:-5050}:80'
     networks:
       - feedbackx-network
     depends_on:
@@ -112,8 +112,13 @@ services:
       # This ensures logs are parsed correctly by Promtail and displayed in Grafana
       # Override in .env if needed, but structured JSON is recommended for Docker deployments
       - LOG_PRETTY=false
+      # Container internal port - application always listens on APP_PORT=3000 inside container
+      # APP_PORT environment variable is read by the application via ConfigService (see src/config/default.config.ts)
+      # Using APP_PORT instead of PORT to avoid conflicts with Docker/system environment variables
+      # APP_FORWARD_PORT (configured below in ports) is the external host port that maps to container port 3000
+      - APP_PORT=3000
     ports:
-      - '${APP_PORT:-3000}:3000'
+      - '${APP_FORWARD_PORT:-3000}:3000'
     networks:
       - feedbackx-network
     depends_on:
@@ -165,7 +170,7 @@ services:
     image: grafana/grafana:10.2.3
     container_name: feedbackx-grafana
     ports:
-      - '${GRAFANA_PORT:-3001}:3000'
+      - '${GRAFANA_FORWARD_PORT:-3001}:3000'
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
