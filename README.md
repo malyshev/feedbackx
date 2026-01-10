@@ -1,123 +1,147 @@
-<p align="center"><img src="./assets/nestjs_plus_docker.webp"  alt="NestJS + Docker: Good Defaults for Production-Ready Services" width="400" /></p>
+# FeedbackX
 
-# NestJS + Docker: Good Defaults for Production-Ready Services
+**Lightweight Feedback Collector for Apps**
 
-> Inspired by best practices from talented practitioners like Brett Fisher, whose guidance I've followed for over a decade.
+An API-first feedback collection backend. Self-hosted, privacy-focused, and opinionated about nothing—except simplicity.
 
-This repository demonstrates how I package and run NestJS applications with Docker using opinionated defaults that
-balance simplicity, performance, and maintainability.
+## Overview
 
-Most examples online either stop at a Dockerfile for local testing or drown you in Kubernetes/CI/CD specifics.
-This repo focuses on the middle ground: good defaults that actually work for production microservices, without
-overengineering.
+FeedbackX is a lightweight REST API backend for collecting feedback. Build your own UI, integrate with any frontend, and own your feedback data.
 
-## Why Another NestJS + Docker Example?
+Built for developers who need a feedback collection backend without the bloat. Perfect for indie hackers, early-stage SaaS teams, and privacy-conscious enterprises.
 
-- **Real-world context.** These defaults are based on proven best practices for production-ready Node.js services using NestJS.
-- **Optimized for DX and Ops.** Simple to build, secure, and predictable images suitable for production.
-- **Patterns, not snippets.** You can reuse this structure across projects, not just copy/paste a Dockerfile.
+## Key Features
 
-## Key Principles
-
-1. **Security first.** Use node:22-alpine (current LTS, small, maintained, minimal attack surface).
-2. **Multi-stage builds.** Keep images small by separating build and runtime stages.
-3. **Reproducibility.** Deterministic installs (npm ci / pnpm install --frozen-lockfile).
-4. **Non-root runtime.** Containers drop privileges → run as unprivileged user.
-5. **Operational hygiene.** Containers provide health checks and log cleanly.
-
-## What's Inside
-
-This template provides production-ready defaults for NestJS applications:
-
-### 🐳 Docker & Containerization
-
-- Multi-stage Dockerfile with security hardening
-- Non-root user, minimal attack surface
-- External health checks for container monitoring
-- Production-ready image optimization
-
-→ See [Docker Usage](./docs/DOCKER.md) for details
-
-### 🛠️ Code Quality & Developer Experience
-
-- ESLint + Prettier with TypeScript rules
-- Husky Git hooks for pre-commit/pre-push checks
-- Coverage thresholds (80%) enforced in CI/CD
-- GitHub Actions CI workflow
-
-→ See [Development Workflow](./docs/DEVELOPMENT.md) for details
-
-### 🔒 Security & Configuration
-
-- Helmet middleware with essential security headers
-- CORS configuration with environment-specific settings
-- Rate limiting with configurable throttling
-- Environment-aware configuration management
-
-→ See [Configuration Guide](./docs/CONFIGURATION.md) for details
+- **API-first** – REST API backend for feedback collection
+- **Self-hosted** – Docker-ready deployment, full control over your data
+- **Production-ready** – Security headers, CORS, rate limiting, structured logging
+- **Minimalist** – Simple and focused
+- **Open-source** – MIT/Apache 2.0 licensed
 
 ## Quick Start
 
-### Docker
+### Self-hosted Deployment
 
-```shell
+Deploy FeedbackX using Docker:
+
+```bash
 # Build and run
-docker build -t my-nest-service:latest .
-docker run --rm -p 3000:3000 my-nest-service:latest
+docker build -t feedbackx:latest .
+docker run -d -p 3000:3000 feedbackx:latest
+
+# Or use docker-compose
+docker-compose up -d
 ```
 
 ### Local Development
 
-```shell
-# Install dependencies
+For contributing or local development:
+
+```bash
+# Clone and install
+git clone https://github.com/yourusername/feedbackx.git
+cd feedbackx
 npm install
 
 # Start development server
 npm run start:dev
 ```
 
-See [docs/DOCKER.md](./docs/DOCKER.md) for detailed Docker usage.
+The API will be available at `http://localhost:3000`.
+
+## Configuration
+
+Configuration is managed via environment variables:
+
+```bash
+# Server
+PORT=3000
+NODE_ENV=development
+
+# CORS
+CORS_ORIGIN=http://localhost:3000
+
+# Rate Limiting
+THROTTLE_TTL=60
+THROTTLE_LIMIT=100
+
+# Logging
+LOG_LEVEL=info
+LOG_PRETTY=true
+```
+
+## Development
+
+### Prerequisites
+
+- Node.js 22+ (LTS)
+
+### Scripts
+
+```bash
+npm run start:dev    # Start development server
+npm run build        # Build for production
+npm run test         # Run unit tests
+npm run test:e2e     # Run end-to-end tests
+npm run lint         # Lint code
+npm run format       # Format code
+```
+
+## Contributing
+
+We welcome contributions! This project follows [Conventional Commits](https://www.conventionalcommits.org/) for both internal development and external contributions.
+
+### Getting Started
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass (`npm test`)
+6. Commit your changes using conventional commit format (e.g., `git commit -m 'feat: add amazing feature'`)
+7. Push to the branch (`git push origin feature/amazing-feature`)
+8. Open a Pull Request
+
+### Development Guidelines
+
+- Follow the existing code style (enforced by ESLint/Prettier)
+- Write tests for new features
+- Update documentation as needed
+- Keep commits focused and atomic
+- **Use conventional commit messages** – We follow conventional commits for all commits, both internal and contributions
+  - `feat:` for new features
+  - `fix:` for bug fixes
+  - `docs:` for documentation changes
+  - `style:` for formatting changes
+  - `refactor:` for code refactoring
+  - `test:` for adding tests
+  - `chore:` for maintenance tasks
+
+## License
+
+This project is dual-licensed under:
+
+- **MIT License** – See [LICENSE-MIT](LICENSE-MIT)
+- **Apache 2.0 License** – See [LICENSE-APACHE](LICENSE-APACHE)
+
+You may choose either license for your use case.
 
 ## Documentation
 
-- **[Docker Usage](./docs/DOCKER.md)** - Docker build, run, and environment configuration
-- **[Configuration Guide](./docs/CONFIGURATION.md)** - All configuration options and customization
-- **[Development Workflow](./docs/DEVELOPMENT.md)** - Code quality, testing, and CI/CD
-- **[Logging](./docs/LOGGING.md)** - Pino logging configuration and Grafana stack setup
+- **[Configuration Guide](./docs/CONFIGURATION.md)** – Detailed configuration options
+- **[Docker Deployment](./docs/DOCKER.md)** – Docker setup and deployment
+- **[Development Guide](./docs/DEVELOPMENT.md)** – Development workflow and guidelines
+- **[Logging](./docs/LOGGING.md)** – Pino logging configuration and Grafana stack setup
 
-## Assessments
+## Roadmap
 
-### Dockerfile Assessment
+See [ROADMAP.md](./ROADMAP.md) for planned features and milestones.
 
-**Score:** 9.7 / 10  
-**Strengths:** Security hardening, clean architecture, attack surface reduction, full documentation  
-**Verdict:** Production-ready, enterprise-hardened, passes security audits
+## Support
 
-### Code Quality Tooling Assessment
+- **Issues** – [GitHub Issues](https://github.com/yourusername/feedbackx/issues)
+- **Discussions** – [GitHub Discussions](https://github.com/yourusername/feedbackx/discussions)
 
-**Score:** 9.5 / 10  
-**Strengths:** Comprehensive ESLint/Prettier setup, automated Git hooks, coverage enforcement  
-**Verdict:** Enterprise-grade development workflow with automated quality gates
+---
 
-### Security Assessment
-
-**Score:** 9.8 / 10  
-**Strengths:** Essential security headers, CORS configuration, rate limiting, comprehensive testing  
-**Verdict:** Complete security implementation with proper testing coverage
-
-## 📖 Related Articles
-
-### 🐳 Docker & Containerization
-
-**Production-Ready Docker for NestJS: Good Defaults That Actually Work**  
-➡️ [Read the full article](https://medium.com/javascript-in-plain-english/production-ready-docker-for-nestjs-good-defaults-that-actually-work-0ec57d994e64)
-
-### 🛠️ Code Quality & Developer Experience
-
-**Code Quality & Developer Experience in NestJS: How Not to Kill Your Team**  
-➡️ [Read the full article](https://medium.com/javascript-in-plain-english/code-quality-developer-experience-in-nestjs-how-not-to-kill-your-team-2c434f790f44)
-
-### 🔒 Security & Production Defaults
-
-**Secure Your NestJS Application: Production-Ready Defaults for Safety and DX**  
-➡️ [Read the full article](https://medium.com/javascript-in-plain-english/secure-your-nestjs-application-production-ready-defaults-for-safety-and-dx-1b6896b1ce74)
+Made with ❤️ for developers who value simplicity and privacy.

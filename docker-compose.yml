@@ -128,7 +128,7 @@ services:
   # Grafana connects using service name 'loki' - no external port needed
   # To expose Loki API port, uncomment the ports section below
   loki:
-    image: grafana/loki:2.9.3
+    image: grafana/loki:2.9.5
     container_name: feedbackx-loki
     # Expose Loki API port only if explicitly needed (for external query tools)
     # Default: internal only for better security isolation
@@ -143,8 +143,9 @@ services:
     restart: unless-stopped
 
   # Promtail - log collection agent (internal only, no external ports)
+  # Version 3.6.3+ required for Docker API 1.44+ support (2.9.x series uses Docker API 1.42 which is incompatible)
   promtail:
-    image: grafana/promtail:2.9.3
+    image: grafana/promtail:3.6.3
     container_name: feedbackx-promtail
     volumes:
       - ./docker/promtail/config.yml:/etc/promtail/config.yml:ro

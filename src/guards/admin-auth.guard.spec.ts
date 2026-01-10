@@ -14,10 +14,10 @@ describe('AdminAuthGuard', () => {
 
     const mockAdminSecret = 'test-admin-secret-12345';
     const mockRequest = {
-        headers: {},
+        headers: {} as Request['headers'],
         url: '/admin/test',
         ip: '127.0.0.1',
-    } as unknown as Request;
+    } as Request & { ip?: string };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -48,7 +48,7 @@ describe('AdminAuthGuard', () => {
         // Mock execution context
         mockExecutionContext = {
             switchToHttp: jest.fn().mockReturnValue({
-                getRequest: jest.fn().mockReturnValue(mockRequest),
+                getRequest: jest.fn().mockReturnValue(mockRequest as Request),
             }),
         } as unknown as ExecutionContext;
 
@@ -206,7 +206,7 @@ describe('AdminAuthGuard', () => {
                 adminSecret: mockAdminSecret,
             });
             mockRequest.headers.authorization = `Bearer ${mockAdminSecret}`;
-            mockRequest.ip = undefined as unknown as string;
+            delete mockRequest.ip;
             mockRequest.headers['x-forwarded-for'] = '192.168.1.1, 10.0.0.1';
 
             // Act
@@ -228,7 +228,7 @@ describe('AdminAuthGuard', () => {
                 adminSecret: mockAdminSecret,
             });
             mockRequest.headers.authorization = `Bearer ${mockAdminSecret}`;
-            mockRequest.ip = undefined as unknown as string;
+            delete mockRequest.ip;
             delete mockRequest.headers['x-forwarded-for'];
             mockRequest.headers['x-real-ip'] = '10.0.0.1';
 
@@ -251,7 +251,7 @@ describe('AdminAuthGuard', () => {
                 adminSecret: mockAdminSecret,
             });
             mockRequest.headers.authorization = `Bearer ${mockAdminSecret}`;
-            mockRequest.ip = undefined as unknown as string;
+            delete mockRequest.ip;
             delete mockRequest.headers['x-forwarded-for'];
             delete mockRequest.headers['x-real-ip'];
 

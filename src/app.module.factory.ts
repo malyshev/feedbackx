@@ -9,7 +9,7 @@ import type { ThrottlerModuleOptions } from '@nestjs/throttler';
  * @returns LoggerModule configuration
  * @throws Error if logging configuration is missing
  */
-export const loggerModuleFactory = (configService: ConfigService) => {
+export const loggerModuleFactory = (configService: ConfigService): { pinoHttp: PinoHttpConfig } => {
     const loggingConfig = configService.get<AppConfig['logging']>('logging');
     if (!loggingConfig) {
         throw new Error('Logging configuration not found. Ensure ConfigModule is properly configured.');
