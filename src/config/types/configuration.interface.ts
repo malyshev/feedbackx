@@ -106,6 +106,8 @@ export interface AppConfig {
         database: string;
         /** Auto-synchronize database schema (WARNING: only use in development, never in production) */
         synchronize: boolean;
+        /** Enable TypeORM query logging (default: false) */
+        logging: boolean;
         /** Connection pool maximum connections */
         poolMax: number;
         /** Connection pool minimum connections */
@@ -116,6 +118,12 @@ export interface AppConfig {
         poolConnectionTimeout: number;
         /** Query timeout in milliseconds */
         queryTimeout: number;
+        /** Connection pool connection limit (max concurrent connections allowed) */
+        connectionLimit: number;
+        /** Statement cache size (0 to disable, set to limit to reduce memory) */
+        statementCacheSize: number;
+        /** Allow exit on idle connections (default: false) */
+        allowExitOnIdle: boolean;
     };
 }
 

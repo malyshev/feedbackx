@@ -1,4 +1,5 @@
 import { ConfigService } from '@nestjs/config';
+import type { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import type { AppConfig, PinoHttpConfig } from './config/types/configuration.interface';
 import type { ThrottlerModuleOptions } from '@nestjs/throttler';
 
@@ -48,4 +49,59 @@ export const throttlerModuleFactory = (configService: ConfigService): ThrottlerM
         throw new Error('Throttle configuration not found. Ensure ConfigModule is properly configured.');
     }
     return throttle;
+};
+
+/**
+ * Factory function for TypeORM configuration.
+ *
+ * @param configService - NestJS ConfigService instance
+ * @returns TypeORM module options
+ * @throws Error if database configuration is missing
+ */
+export const typeOrmModuleFactory = (configService: ConfigService): TypeOrmModuleOptions => {
+    const dbConfig = configService.get<AppConfig['database']>('database');
+    if (!dbConfig) {
+        throw new Error('Database configuration not found. Ensure ConfigModule is properly configured.');
+    }
+
+    // Entity path pattern: use .ts for test environment, .js for production/development
+    // Test environment: use source .ts files (with ts-node)
+    // Production/Development: use compiled .js files from dist/ directory
+    const rootPath = process.cwd();
+    const isTest = configService.get<string>('NODE_ENV') === 'test';
+    const entityExtension = isTest ? 'ts' : 'js';
+    const entityBasePath = isTest ? `${rootPath}/src` : `${rootPath}/dist`;
+    const entitiesPath = `${entityBasePath}/**/*.entity.${entityExtension}`;
+    const entities: string[] = [entitiesPath];
+
+    return {
+        type: 'postgres',
+        host: dbConfig.host,
+        port: dbConfig.port,
+        username: dbConfig.username,
+        password: dbConfig.password,
+        database: dbConfig.database,
+        entities,
+        synchronize: dbConfig.synchronize,
+        logging: dbConfig.logging,
+        extra: {
+            // Connection pool configuration
+            max: dbConfig.poolMax,
+            min: dbConfig.poolMin,
+            idleTimeoutMillis: dbConfig.poolIdleTimeout,
+            connectionTimeoutMillis: dbConfig.poolConnectionTimeout,
+
+            // Query timeout
+            query_timeout: dbConfig.queryTimeout,
+
+            // Connection validation and management
+            allowExitOnIdle: dbConfig.allowExitOnIdle,
+
+            // Statement cache (0 to disable, or limit to reduce memory)
+            statement_cache_size: dbConfig.statementCacheSize,
+
+            // Connection pool size - maximum number of concurrent connections allowed
+            connectionLimit: dbConfig.connectionLimit,
+        },
+    };
 };

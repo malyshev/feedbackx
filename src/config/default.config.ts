@@ -19,10 +19,11 @@ export const defaultConfig = (configService: ConfigService): AppConfig => ({
 
         // Application port - the port on which the server will listen
         // Default: 3000 - standard Node.js port
-        // Override via PORT environment variable for different ports or multiple instances
-        // Example: PORT=8080 npm run start:dev
+        // Override via APP_PORT environment variable for different ports or multiple instances
+        // Example: APP_PORT=8080 npm run start:dev
+        // Note: Using APP_PORT instead of PORT to avoid conflicts with Docker/system environment variables
         // ConfigService automatically converts string env vars to numbers when type is specified
-        port: configService.get<number>('PORT', 3000),
+        port: configService.get<number>('APP_PORT', 3000),
 
         // Application name - used for logging, monitoring, and identification
         // Default: 'nestjs-app'
@@ -300,5 +301,43 @@ export const defaultConfig = (configService: ConfigService): AppConfig => ({
         // Example: DB_QUERY_TIMEOUT=60000 (1 minute) for reporting queries
         // ConfigService automatically converts string env vars to numbers when type is specified
         queryTimeout: configService.get<number>('DB_QUERY_TIMEOUT', 30000),
+
+        // TypeORM query logging - enable SQL query logging (development/debugging only)
+        // Default: false - disable in production for performance
+        // Override via DB_LOGGING environment variable (true/false)
+        // Enable for debugging SQL queries during development
+        // WARNING: Can generate significant log volume - only use when needed
+        // Example: DB_LOGGING=true for development debugging
+        // Explicitly convert string to boolean - env vars are strings ("true"/"false")
+        // ConfigService.get<boolean> doesn't always handle string conversion correctly
+        logging: configService.get<string>('DB_LOGGING', 'false') === 'true',
+
+        // Connection pool connection limit - maximum number of concurrent connections allowed
+        // Default: 20 (same as poolMax for consistency)
+        // Override via DB_POOL_CONNECTION_LIMIT environment variable
+        // Sets the maximum number of connections that can be created at once
+        // Should match or be less than poolMax for consistency
+        // Example: DB_POOL_CONNECTION_LIMIT=50 for high-traffic applications
+        // ConfigService automatically converts string env vars to numbers when type is specified
+        connectionLimit: configService.get<number>('DB_POOL_CONNECTION_LIMIT', 20),
+
+        // Statement cache size - limit prepared statement cache (0 to disable)
+        // Default: 0 (disabled to reduce memory usage)
+        // Override via DB_STATEMENT_CACHE_SIZE environment variable
+        // Set to 0 to disable statement caching (reduces memory usage)
+        // Increase if you have many prepared statements and want to cache them
+        // Example: DB_STATEMENT_CACHE_SIZE=100 to cache up to 100 statements
+        // ConfigService automatically converts string env vars to numbers when type is specified
+        statementCacheSize: configService.get<number>('DB_STATEMENT_CACHE_SIZE', 0),
+
+        // Allow exit on idle - allow process to exit when connections are idle
+        // Default: false (keep connections alive for better performance)
+        // Override via DB_ALLOW_EXIT_ON_IDLE environment variable (true/false)
+        // When true, allows the process to exit if all connections are idle
+        // When false, keeps connections alive (recommended for server applications)
+        // Example: DB_ALLOW_EXIT_ON_IDLE=false for server applications
+        // Explicitly convert string to boolean - env vars are strings ("true"/"false")
+        // ConfigService.get<boolean> doesn't always handle string conversion correctly
+        allowExitOnIdle: configService.get<string>('DB_ALLOW_EXIT_ON_IDLE', 'false') === 'true',
     },
 });

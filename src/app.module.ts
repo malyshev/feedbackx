@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { configuration } from './config/configuration';
-import { loggerModuleFactory, throttlerModuleFactory } from './app.module.factory';
+import { loggerModuleFactory, throttlerModuleFactory, typeOrmModuleFactory } from './app.module.factory';
 
 @Module({
     imports: [
@@ -26,6 +27,13 @@ import { loggerModuleFactory, throttlerModuleFactory } from './app.module.factor
             imports: [ConfigModule],
             inject: [ConfigService],
             useFactory: throttlerModuleFactory,
+        }),
+        // TypeORM database configuration - imports ConfigModule to use ConfigService
+        // Entities are auto-discovered using pattern: **/*.entity.ts (test) or **/*.entity.js (production)
+        TypeOrmModule.forRootAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: typeOrmModuleFactory,
         }),
     ],
     controllers: [AppController],
