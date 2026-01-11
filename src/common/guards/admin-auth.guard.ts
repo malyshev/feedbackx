@@ -2,7 +2,7 @@ import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from
 import { ConfigService } from '@nestjs/config';
 import { Logger } from 'nestjs-pino';
 import type { Request } from 'express';
-import type { AppConfig } from '../config/types/configuration.interface';
+import type { AppConfig } from '../../config/types/configuration.interface';
 
 /**
  * Admin authentication guard that validates Bearer token authentication.

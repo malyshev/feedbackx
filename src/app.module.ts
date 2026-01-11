@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -8,6 +8,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { configuration } from './config/configuration';
 import { loggerModuleFactory, throttlerModuleFactory, typeOrmModuleFactory } from './app.module.factory';
+import { RealmModule } from './realm/realm.module';
+import { CommonErrorInterceptor } from './common/interceptors';
 
 @Module({
     imports: [
@@ -35,6 +37,8 @@ import { loggerModuleFactory, throttlerModuleFactory, typeOrmModuleFactory } fro
             inject: [ConfigService],
             useFactory: typeOrmModuleFactory,
         }),
+
+        RealmModule,
     ],
     controllers: [AppController],
     providers: [
@@ -43,6 +47,11 @@ import { loggerModuleFactory, throttlerModuleFactory, typeOrmModuleFactory } fro
         {
             provide: APP_GUARD,
             useClass: ThrottlerGuard,
+        },
+        // Apply common error interceptor globally
+        {
+            provide: APP_INTERCEPTOR,
+            useClass: CommonErrorInterceptor,
         },
     ],
 })

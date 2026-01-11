@@ -4,6 +4,8 @@ import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
 import type { AppConfig } from './config/types/configuration.interface';
+import { ValidationPipe } from '@nestjs/common';
+import { createValidationException } from './common/exceptions';
 
 async function bootstrap(): Promise<void> {
     // Create app with buffered logs - logs are buffered until logger is ready
@@ -26,6 +28,15 @@ async function bootstrap(): Promise<void> {
     // Config is required - the app will fail to start if missing (secure by default)
     app.use(helmet(helmetConfig));
     app.enableCors(corsConfig);
+
+    app.useGlobalPipes(
+        new ValidationPipe({
+            transform: true,
+            whitelist: true,
+            forbidUnknownValues: true,
+            exceptionFactory: createValidationException,
+        }),
+    );
 
     // Start application on configured port
     await app.listen(appConfig.port);

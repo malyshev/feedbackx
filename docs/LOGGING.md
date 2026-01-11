@@ -430,7 +430,7 @@ Data is stored in Docker volumes:
 To backup:
 
 ```shell
-docker run --rm -v nestjs-docker-good-defaults_loki-data:/data -v $(pwd):/backup alpine tar czf /backup/loki-backup.tar.gz /data
+docker run --rm -v feedbackx_loki-data:/data -v $(pwd):/backup alpine tar czf /backup/loki-backup.tar.gz /data
 ```
 
 ### Performance
