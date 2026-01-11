@@ -39,6 +39,15 @@ export const defaultConfig = (configService: ConfigService): AppConfig => ({
         // Example: ADMIN_SECRET=a1b2c3d4e5f6... npm run start:dev
         // Security consideration: Minimum 32 characters recommended for production
         adminSecret: configService.get<string>('ADMIN_SECRET'),
+
+        // Swagger/OpenAPI documentation enable flag
+        // Default: false (disabled by default for security)
+        // Override via SWAGGER_ENABLE environment variable ('true' or 'false')
+        // Development: Enable for interactive API documentation (true)
+        // Production: Disable to avoid exposing API structure (false)
+        // Example: SWAGGER_ENABLE=true npm run start:dev
+        // Security: Should be false in production - don't expose API structure to public
+        swaggerEnable: configService.get<string>('SWAGGER_ENABLE', 'false') === 'true',
     },
     cors: {
         // Allow credentials (cookies, authorization headers) - set to false by default for security

@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import type { AppConfig } from './config/types/configuration.interface';
 import { ValidationPipe } from '@nestjs/common';
 import { createValidationException } from './common/exceptions';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap(): Promise<void> {
     // Create app with buffered logs - logs are buffered until logger is ready
@@ -23,6 +24,26 @@ async function bootstrap(): Promise<void> {
     const appConfig = configService.getOrThrow<AppConfig['app']>('app');
     const corsConfig = configService.getOrThrow<AppConfig['cors']>('cors');
     const helmetConfig = configService.getOrThrow<AppConfig['helmet']>('helmet');
+
+    if (appConfig.swaggerEnable) {
+        const openApiConfig = new DocumentBuilder()
+            .setTitle('FeedbackX API')
+            .setDescription('FeedbackX - Anonymous feedback collection service')
+            .setVersion('1.0.0')
+            .addBearerAuth(
+                {
+                    type: 'http',
+                    scheme: 'bearer',
+                    description: 'API key authentication. Use format: Bearer {apiKey}',
+                },
+                'API-KEY',
+            )
+            .build();
+
+        SwaggerModule.setup('swagger', app, SwaggerModule.createDocument(app, openApiConfig), {
+            jsonDocumentUrl: 'swagger/json',
+        });
+    }
 
     // Apply security middleware - uses merged config via ConfigService
     // Config is required - the app will fail to start if missing (secure by default)

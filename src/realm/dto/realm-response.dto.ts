@@ -1,4 +1,5 @@
-import { IntersectionType } from '@nestjs/mapped-types';
+import { IntersectionType } from '@nestjs/swagger';
+import { ApiExtraModels } from '@nestjs/swagger';
 import { BaseRealmDto } from './base-realm.dto';
 import { RealmGeneratedFieldsDto } from './realm-generated-fields.dto';
 
@@ -8,4 +9,5 @@ import { RealmGeneratedFieldsDto } from './realm-generated-fields.dto';
  * Omits sensitive apiKey - used in GET /realms endpoints for non-admin users
  * Uses IntersectionType to combine BaseRealmDto fields with auto-generated fields
  */
+@ApiExtraModels(BaseRealmDto, RealmGeneratedFieldsDto)
 export class RealmResponseDto extends IntersectionType(BaseRealmDto, RealmGeneratedFieldsDto) {}

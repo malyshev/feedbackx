@@ -18,6 +18,8 @@ export interface AppConfig {
         name: string;
         /** Admin secret key - used for admin authentication and secure operations */
         adminSecret: string | undefined;
+        /** Swagger/OpenAPI documentation enable flag */
+        swaggerEnable: boolean;
     };
 
     /**
