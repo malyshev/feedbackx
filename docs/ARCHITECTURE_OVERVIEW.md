@@ -46,7 +46,7 @@ A typical MVP might have:
 
 - Code mixed with business logic and API concerns (hard to change)
 - No automated testing (bugs reach production)
-- Manual deployment (risky, time-consuming)
+- Inconsistent deployment processes (works locally but fails in production)
 - No monitoring (problems discovered by customers)
 - Security vulnerabilities (data breaches cost millions)
 
@@ -223,6 +223,16 @@ This codebase demonstrates how to build an MVP that **doesn't need a rewrite**. 
 - TypeScript provides type safety without Java/.NET complexity
 - **Cost savings**: 50-70% lower server costs, faster development cycles
 
+**NestJS vs. PHP/Laravel**:
+
+- TypeScript provides compile-time error checking (PHP errors only at runtime)
+- Better performance (Node.js non-blocking I/O vs. PHP's request-per-process model)
+- Modern async/await patterns (PHP async support is limited and complex)
+- Unified JavaScript ecosystem (frontend and backend share code/types)
+- Better tooling (TypeScript IDE support, better debugging)
+- **Cost savings**: 30-50% lower server costs (better concurrency handling)
+- **Time savings**: 20-40% faster development (type safety catches bugs earlier)
+
 **Built-in Features**:
 
 - Validation, transformation, error handling out-of-the-box
@@ -243,8 +253,8 @@ This codebase demonstrates how to build an MVP that **doesn't need a rewrite**. 
 
 - More flexible (supports complex queries, raw SQL when needed)
 - Better TypeScript integration
-- Active Record + Data Mapper patterns (choose what fits)
-- **Benefit**: Handles simple and complex use cases equally well
+- Repository pattern (clean separation of data access logic)
+- **Benefit**: Handles simple and complex use cases equally well, better testability
 
 **Developer Experience**:
 
@@ -290,16 +300,16 @@ This codebase demonstrates how to build an MVP that **doesn't need a rewrite**. 
 
 ### Technology Stack Comparison
 
-| Aspect                     | Node.js/NestJS/TypeORM          | Java Spring                     | Python Django              | Ruby on Rails                 |
-| -------------------------- | ------------------------------- | ------------------------------- | -------------------------- | ----------------------------- |
-| **Development Speed**      | Fast (TypeScript, good tooling) | Moderate (verbose, boilerplate) | Fast (simple syntax)       | Fast (convention over config) |
-| **Performance**            | Excellent (non-blocking I/O)    | Good (JVM overhead)             | Moderate (GIL limitations) | Moderate (single-threaded)    |
-| **Server Costs**           | Low (efficient resource usage)  | Higher (JVM memory)             | Moderate                   | Moderate                      |
-| **Developer Availability** | High (JavaScript ecosystem)     | High (enterprise)               | High (data science)        | Lower (declining)             |
-| **Type Safety**            | Excellent (TypeScript)          | Excellent (Java)                | Moderate (optional typing) | Poor (dynamic)                |
-| **Ecosystem**              | Largest (npm)                   | Large (Maven)                   | Large (PyPI)               | Moderate (RubyGems)           |
-| **Learning Curve**         | Moderate                        | Steep                           | Gentle                     | Gentle                        |
-| **Best For**               | APIs, real-time, startups       | Enterprise, large teams         | Data-heavy, ML             | Rapid prototyping             |
+| Aspect                     | Node.js/NestJS/TypeORM          | Java Spring                     | Python Django              | Ruby on Rails                 | PHP/Laravel                    |
+| -------------------------- | ------------------------------- | ------------------------------- | -------------------------- | ----------------------------- | ------------------------------ |
+| **Development Speed**      | Fast (TypeScript, good tooling) | Moderate (verbose, boilerplate) | Fast (simple syntax)       | Fast (convention over config) | Fast (mature framework)        |
+| **Performance**            | Excellent (non-blocking I/O)    | Good (JVM overhead)             | Moderate (GIL limitations) | Moderate (single-threaded)    | Moderate (request-per-process) |
+| **Server Costs**           | Low (efficient resource usage)  | Higher (JVM memory)             | Moderate                   | Moderate                      | Moderate (higher for scale)    |
+| **Developer Availability** | High (JavaScript ecosystem)     | High (enterprise)               | High (data science)        | Lower (declining)             | High (legacy codebase)         |
+| **Type Safety**            | Excellent (TypeScript)          | Excellent (Java)                | Moderate (optional typing) | Poor (dynamic)                | Poor (runtime errors)          |
+| **Ecosystem**              | Largest (npm)                   | Large (Maven)                   | Large (PyPI)               | Moderate (RubyGems)           | Large (Composer)               |
+| **Learning Curve**         | Moderate                        | Steep                           | Gentle                     | Gentle                        | Gentle                         |
+| **Best For**               | APIs, real-time, startups       | Enterprise, large teams         | Data-heavy, ML             | Rapid prototyping             | Legacy systems, WordPress      |
 
 **FeedbackX Choice**: Node.js/NestJS/TypeORM provides the best balance of speed, cost, and scalability for startups.
 
@@ -320,10 +330,10 @@ This codebase demonstrates how to build an MVP that **doesn't need a rewrite**. 
 
 **Business Benefits**:
 
-- **Deploy in minutes**, not days (typical MVP: manual setup, hours of debugging)
 - **Consistent environments** (no "works on my machine" issues)
+- **Reproducible deployments** (same container works everywhere)
 - **Easy scaling** (run multiple instances, add load balancers)
-- **Cost savings**: 30-50% reduction in deployment-related downtime
+- **Cost savings**: 30-50% reduction in deployment-related downtime and debugging time
 
 **Reference**: See [`Dockerfile`](../Dockerfile) for security hardening and [`docker-compose.yml`](../docker-compose.yml) for complete infrastructure setup.
 
@@ -651,7 +661,7 @@ A data breach can **destroy a startup**. Beyond financial costs (fines, lawsuits
 | **Feature Development (Month 6+)**  | Slow, getting slower  | Fast, stays fast           |
 | **Bug Rate**                        | High, increasing      | Low, stable                |
 | **Onboarding Time**                 | 3-4 weeks             | 1-2 weeks                  |
-| **Deployment Time**                 | Hours/days            | Minutes                    |
+| **Deployment Reliability**          | Inconsistent          | Reproducible/Reliable      |
 | **Monitoring**                      | None/Manual           | Automated                  |
 | **Test Coverage**                   | 0-20%                 | 99%+                       |
 | **Security**                        | Basic/None            | Enterprise-grade           |
@@ -711,7 +721,7 @@ When evaluating a startup's codebase, look for these indicators of quality:
 
 - Mixed concerns (business logic in controllers)
 - No tests or low test coverage
-- Manual deployment processes
+- Inconsistent deployment processes (works locally but fails in production)
 - No monitoring or logging
 - Security vulnerabilities
 - Inconsistent code style
