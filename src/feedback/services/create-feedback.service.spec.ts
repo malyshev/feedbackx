@@ -1,13 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateRealmService } from './create-realm.service';
-import { RealmEntity } from '../entities/realm.entity';
+import { CreateFeedbackService } from './create-feedback.service';
+import { FeedbackEntity } from '../entities/feedback.entity';
+import { CreateFeedbackModel, ScaleType, NumericScaleModel } from '../models';
 import { ValidationException } from '../../common/exceptions';
 
-describe('CreateRealmService', () => {
-    let service: CreateRealmService;
-    let repository: jest.Mocked<Repository<RealmEntity>>;
+describe('CreateFeedbackService', () => {
+    let service: CreateFeedbackService;
+    let repository: jest.Mocked<Repository<FeedbackEntity>>;
 
     const mockRepository = {
         findOne: jest.fn(),
@@ -18,16 +19,16 @@ describe('CreateRealmService', () => {
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
-                CreateRealmService,
+                CreateFeedbackService,
                 {
-                    provide: getRepositoryToken(RealmEntity),
+                    provide: getRepositoryToken(FeedbackEntity),
                     useValue: mockRepository,
                 },
             ],
         }).compile();
 
-        service = module.get<CreateRealmService>(CreateRealmService);
-        repository = module.get(getRepositoryToken(RealmEntity));
+        service = module.get<CreateFeedbackService>(CreateFeedbackService);
+        repository = module.get(getRepositoryToken(FeedbackEntity));
     });
 
     afterEach(() => {
@@ -38,112 +39,116 @@ describe('CreateRealmService', () => {
         expect(service).toBeDefined();
     });
 
-    describe('handle', () => {
-        const mockPartialRealm: Partial<RealmEntity> = {
-            name: 'Test Realm',
-            key: 'test-realm',
+    describe('create', () => {
+        const mockCreateModel: CreateFeedbackModel = {
+            name: 'Test Feedback',
+            key: 'test-feedback',
             description: 'Test description',
             scale: {
-                type: 'numeric',
+                type: ScaleType.NUMERIC,
                 min: 0,
                 max: 10,
-            },
+            } as NumericScaleModel,
         };
 
-        const mockSavedRealm: RealmEntity = {
+        const mockSavedFeedback: FeedbackEntity = {
             id: '123e4567-e89b-12d3-a456-426614174000',
-            name: 'Test Realm',
-            key: 'test-realm',
+            name: 'Test Feedback',
+            key: 'test-feedback',
             description: 'Test description',
             apiKey: 'fx_abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
             scale: {
-                type: 'numeric',
+                type: ScaleType.NUMERIC,
                 min: 0,
                 max: 10,
             },
             createdAt: new Date(),
             updatedAt: new Date(),
-        } as RealmEntity;
+        } as FeedbackEntity;
 
-        it('should create a realm with generated API key', async () => {
+        it('should create a feedback collection with generated API key', async () => {
             repository.findOne.mockResolvedValue(null);
-            repository.save.mockResolvedValue(mockSavedRealm);
+            repository.save.mockResolvedValue(mockSavedFeedback);
 
-            const result = await service.handle(mockPartialRealm);
+            const result = await service.create(mockCreateModel);
 
             expect(repository.findOne).toHaveBeenCalledWith({
-                where: [{ name: 'Test Realm' }, { key: 'test-realm' }],
+                where: [{ name: 'Test Feedback' }, { key: 'test-feedback' }],
             });
             expect(repository.save).toHaveBeenCalledWith({
-                ...mockPartialRealm,
+                ...mockCreateModel,
                 apiKey: expect.stringMatching(/^fx_[a-f0-9]{64}$/),
             });
-            expect(result).toEqual(mockSavedRealm);
+            expect(result).toEqual(mockSavedFeedback);
             expect(result.apiKey).toMatch(/^fx_[a-f0-9]{64}$/);
         });
 
         it('should throw ValidationException if name already exists', async () => {
-            const existingRealm: RealmEntity = {
+            const existingFeedback: FeedbackEntity = {
                 id: 'existing-id',
-                name: 'Test Realm',
+                name: 'Test Feedback',
                 key: 'different-key',
                 apiKey: 'existing-key',
                 scale: { type: 'numeric', min: 0, max: 10 },
                 createdAt: new Date(),
                 updatedAt: new Date(),
-            } as RealmEntity;
+            } as FeedbackEntity;
 
-            repository.findOne.mockResolvedValue(existingRealm);
+            repository.findOne.mockResolvedValue(existingFeedback);
 
-            await expect(service.handle(mockPartialRealm)).rejects.toThrow(ValidationException);
-            await expect(service.handle(mockPartialRealm)).rejects.toThrow('Realm name "Test Realm" already taken');
+            await expect(service.create(mockCreateModel)).rejects.toThrow(ValidationException);
+            await expect(service.create(mockCreateModel)).rejects.toThrow(
+                'Feedback collection name "Test Feedback" already taken',
+            );
 
             expect(repository.findOne).toHaveBeenCalled();
             expect(repository.save).not.toHaveBeenCalled();
         });
 
         it('should throw ValidationException if key already exists', async () => {
-            const existingRealm: RealmEntity = {
+            const existingFeedback: FeedbackEntity = {
                 id: 'existing-id',
                 name: 'Different Name',
-                key: 'test-realm',
+                key: 'test-feedback',
                 apiKey: 'existing-key',
                 scale: { type: 'numeric', min: 0, max: 10 },
                 createdAt: new Date(),
                 updatedAt: new Date(),
-            } as RealmEntity;
+            } as FeedbackEntity;
 
-            repository.findOne.mockResolvedValue(existingRealm);
+            repository.findOne.mockResolvedValue(existingFeedback);
 
-            await expect(service.handle(mockPartialRealm)).rejects.toThrow(ValidationException);
-            await expect(service.handle(mockPartialRealm)).rejects.toThrow('Realm key "test-realm" already taken');
+            await expect(service.create(mockCreateModel)).rejects.toThrow(ValidationException);
+            await expect(service.create(mockCreateModel)).rejects.toThrow(
+                'Feedback collection key "test-feedback" already taken',
+            );
 
             expect(repository.findOne).toHaveBeenCalled();
             expect(repository.save).not.toHaveBeenCalled();
         });
 
         it('should throw ValidationException with both errors if name and key both exist', async () => {
-            const existingRealm: RealmEntity = {
+            const existingFeedback: FeedbackEntity = {
                 id: 'existing-id',
-                name: 'Test Realm',
-                key: 'test-realm',
+                name: 'Test Feedback',
+                key: 'test-feedback',
                 apiKey: 'existing-key',
                 scale: { type: 'numeric', min: 0, max: 10 },
                 createdAt: new Date(),
                 updatedAt: new Date(),
-            } as RealmEntity;
+            } as FeedbackEntity;
 
-            repository.findOne.mockResolvedValue(existingRealm);
+            repository.findOne.mockResolvedValue(existingFeedback);
 
-            await expect(service.handle(mockPartialRealm)).rejects.toThrow(ValidationException);
+            await expect(service.create(mockCreateModel)).rejects.toThrow(ValidationException);
 
             try {
-                await service.handle(mockPartialRealm);
+                await service.create(mockCreateModel);
             } catch (error) {
                 expect(error).toBeInstanceOf(ValidationException);
                 expect(error.errors).toEqual({
-                    name: 'Realm name "Test Realm" already taken',
-                    key: 'Realm key "test-realm" already taken',
+                    name: 'Feedback collection name "Test Feedback" already taken',
+                    key: 'Feedback collection key "test-feedback" already taken',
                 });
             }
 
@@ -151,7 +156,7 @@ describe('CreateRealmService', () => {
             expect(repository.save).not.toHaveBeenCalled();
         });
 
-        it('should generate different API keys for each realm', async () => {
+        it('should generate different API keys for each feedback collection', async () => {
             repository.findOne.mockResolvedValue(null);
             repository.save.mockImplementation((entity) =>
                 Promise.resolve({
@@ -159,35 +164,35 @@ describe('CreateRealmService', () => {
                     id: '123e4567-e89b-12d3-a456-426614174000',
                     createdAt: new Date(),
                     updatedAt: new Date(),
-                } as RealmEntity),
+                } as FeedbackEntity),
             );
 
-            const result1 = await service.handle(mockPartialRealm);
-            const result2 = await service.handle({ ...mockPartialRealm, key: 'another-realm' });
+            const result1 = await service.create(mockCreateModel);
+            const result2 = await service.create({ ...mockCreateModel, key: 'another-feedback' });
 
             expect(result1.apiKey).not.toBe(result2.apiKey);
             expect(result1.apiKey).toMatch(/^fx_[a-f0-9]{64}$/);
             expect(result2.apiKey).toMatch(/^fx_[a-f0-9]{64}$/);
         });
 
-        it('should pass through all fields from partialRealm to save', async () => {
-            const realmWithMetadata: Partial<RealmEntity> = {
-                ...mockPartialRealm,
+        it('should pass through all fields from model to save', async () => {
+            const feedbackWithMetadata: CreateFeedbackModel = {
+                ...mockCreateModel,
                 metadata: { customField: 'customValue' },
             };
 
             repository.findOne.mockResolvedValue(null);
             repository.save.mockResolvedValue({
-                ...mockSavedRealm,
+                ...mockSavedFeedback,
                 metadata: { customField: 'customValue' },
             });
 
-            await service.handle(realmWithMetadata);
+            await service.create(feedbackWithMetadata);
 
             expect(repository.save).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    name: 'Test Realm',
-                    key: 'test-realm',
+                    name: 'Test Feedback',
+                    key: 'test-feedback',
                     description: 'Test description',
                     scale: {
                         type: 'numeric',

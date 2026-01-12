@@ -1,36 +1,15 @@
 import { IsEnum, IsNotEmpty, IsNumber, IsArray, IsString } from 'class-validator';
 import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-
-/**
- * Scale type enumeration
- * Defines the types of feedback scoring scales supported
- */
-export enum ScaleType {
-    NUMERIC = 'numeric',
-    ENUM = 'enum',
-}
-
-/**
- * Base Scale DTO
- * Discriminator base class for scale configuration types
- */
-export abstract class ScaleDto {
-    @ApiProperty({
-        enum: ScaleType,
-        example: ScaleType.NUMERIC,
-    })
-    @Expose()
-    @IsEnum(ScaleType)
-    @IsNotEmpty()
-    public abstract readonly type: ScaleType;
-}
+import { PickType } from '@nestjs/mapped-types';
+import { ScaleType, NumericScaleModel, EnumScaleModel } from '../models/scale.model';
 
 /**
  * Numeric Scale DTO
+ * Uses PickType from NumericScaleModel domain model, then adds transport layer decorators
  * Defines a continuous numeric range for feedback scoring (e.g., 0-10, 1-5)
  */
-export class NumericScaleDto extends ScaleDto {
+export class NumericScaleDto extends PickType(NumericScaleModel, ['type', 'min', 'max'] as const) {
     @ApiProperty({
         enum: ScaleType,
         example: ScaleType.NUMERIC,
@@ -38,7 +17,7 @@ export class NumericScaleDto extends ScaleDto {
     @Expose()
     @IsEnum(ScaleType)
     @IsNotEmpty()
-    public readonly type = ScaleType.NUMERIC;
+    declare public readonly type: ScaleType.NUMERIC;
 
     @ApiProperty({
         required: true,
@@ -50,7 +29,7 @@ export class NumericScaleDto extends ScaleDto {
     @IsNumber()
     @Type(() => Number)
     @IsNotEmpty()
-    public min!: number;
+    declare public min: number;
 
     @ApiProperty({
         required: true,
@@ -62,14 +41,15 @@ export class NumericScaleDto extends ScaleDto {
     @IsNumber()
     @Type(() => Number)
     @IsNotEmpty()
-    public max!: number;
+    declare public max: number;
 }
 
 /**
  * Enum Scale DTO
+ * Uses PickType from EnumScaleModel domain model, then adds transport layer decorators
  * Defines discrete predefined values for feedback scoring (e.g., ['bad', 'ok', 'great'])
  */
-export class EnumScaleDto extends ScaleDto {
+export class EnumScaleDto extends PickType(EnumScaleModel, ['type', 'values'] as const) {
     @ApiProperty({
         enum: ScaleType,
         example: ScaleType.ENUM,
@@ -77,7 +57,7 @@ export class EnumScaleDto extends ScaleDto {
     @Expose()
     @IsEnum(ScaleType)
     @IsNotEmpty()
-    public readonly type = ScaleType.ENUM;
+    declare public readonly type: ScaleType.ENUM;
 
     @ApiProperty({
         required: true,
@@ -89,5 +69,5 @@ export class EnumScaleDto extends ScaleDto {
     @IsArray()
     @IsString({ each: true })
     @IsNotEmpty()
-    public values!: string[];
+    declare public values: string[];
 }

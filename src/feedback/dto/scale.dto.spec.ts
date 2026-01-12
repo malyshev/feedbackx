@@ -1,7 +1,8 @@
 import 'reflect-metadata';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
-import { ScaleType, ScaleDto, NumericScaleDto, EnumScaleDto } from './scale.dto';
+import { NumericScaleDto, EnumScaleDto } from './scale.dto';
+import { ScaleType } from '../models/scale.model';
 
 describe('ScaleDto', () => {
     describe('NumericScaleDto', () => {
@@ -177,37 +178,6 @@ describe('ScaleDto', () => {
 
         it('should have ENUM value', () => {
             expect(ScaleType.ENUM).toBe('enum');
-        });
-    });
-
-    describe('ScaleDto abstract class', () => {
-        it('should not be instantiable directly', () => {
-            // TypeScript prevents direct instantiation of abstract classes
-            // This test documents that ScaleDto is abstract
-            expect(ScaleDto).toBeDefined();
-        });
-
-        it('should be the base class for NumericScaleDto', () => {
-            const dto = plainToInstance(NumericScaleDto, {
-                type: ScaleType.NUMERIC,
-                min: 0,
-                max: 10,
-            });
-
-            expect(dto).toBeInstanceOf(NumericScaleDto);
-            // NumericScaleDto extends ScaleDto
-            expect(Object.getPrototypeOf(Object.getPrototypeOf(dto)).constructor).toBe(ScaleDto);
-        });
-
-        it('should be the base class for EnumScaleDto', () => {
-            const dto = plainToInstance(EnumScaleDto, {
-                type: ScaleType.ENUM,
-                values: ['bad', 'ok', 'great'],
-            });
-
-            expect(dto).toBeInstanceOf(EnumScaleDto);
-            // EnumScaleDto extends ScaleDto
-            expect(Object.getPrototypeOf(Object.getPrototypeOf(dto)).constructor).toBe(ScaleDto);
         });
     });
 });

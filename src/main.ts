@@ -7,6 +7,7 @@ import type { AppConfig } from './config/types/configuration.interface';
 import { ValidationPipe } from '@nestjs/common';
 import { createValidationException } from './common/exceptions';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { filterInternalSchemas } from './common/utils';
 
 async function bootstrap(): Promise<void> {
     // Create app with buffered logs - logs are buffered until logger is ready
@@ -40,7 +41,13 @@ async function bootstrap(): Promise<void> {
             )
             .build();
 
-        SwaggerModule.setup('swagger', app, SwaggerModule.createDocument(app, openApiConfig), {
+        const document = SwaggerModule.createDocument(app, openApiConfig);
+
+        // Automatically filter out all schemas marked with @ApiInternal() decorator
+        // Only removes schemas that are not referenced in the document
+        filterInternalSchemas(document);
+
+        SwaggerModule.setup('swagger', app, document, {
             jsonDocumentUrl: 'swagger/json',
         });
     }

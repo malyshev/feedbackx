@@ -8,7 +8,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { configuration } from './config/configuration';
 import { loggerModuleFactory, throttlerModuleFactory, typeOrmModuleFactory } from './app.module.factory';
-import { RealmModule } from './realm/realm.module';
+import { FeedbackModule } from './feedback/feedback.module';
 import { CommonErrorInterceptor } from './common/interceptors';
 
 @Module({
@@ -38,7 +38,7 @@ import { CommonErrorInterceptor } from './common/interceptors';
             useFactory: typeOrmModuleFactory,
         }),
 
-        RealmModule,
+        FeedbackModule,
     ],
     controllers: [AppController],
     providers: [

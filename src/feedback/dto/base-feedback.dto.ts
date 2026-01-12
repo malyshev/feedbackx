@@ -1,41 +1,52 @@
 import { IsNotEmpty, IsObject, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
 import { Expose, Type } from 'class-transformer';
 import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
-import { EnumScaleDto, NumericScaleDto, ScaleDto, ScaleType } from './scale.dto';
+import { PickType } from '@nestjs/mapped-types';
+import { ApiInternal } from '../../common/decorators';
+import { EnumScaleDto, NumericScaleDto } from './scale.dto';
+import { CreateFeedbackModel, ScaleModel, ScaleType } from '../models';
 
 /**
- * Base Realm DTO
- * Base class containing common realm fields shared across all realm DTOs
- * Provides the core realm structure (name, key, description, scale, metadata)
+ * Base Feedback DTO
+ * Uses PickType from CreateFeedbackModel domain model, then adds transport layer decorators
+ * Base class containing common feedback collection fields shared across all feedback DTOs
+ * Provides the core feedback collection structure (name, key, description, scale, metadata)
  * Note: Not abstract to allow use with IntersectionType which requires concrete classes
  */
+@ApiInternal()
 @ApiExtraModels(NumericScaleDto, EnumScaleDto)
-export class BaseRealmDto {
+export class BaseFeedbackDto extends PickType(CreateFeedbackModel, [
+    'name',
+    'key',
+    'description',
+    'scale',
+    'metadata',
+] as const) {
     @ApiProperty({
         required: true,
         example: 'Customer Satisfaction',
         maxLength: 63,
         description:
-            'Human-readable identifier for administration and UI. Maximum length: 63 characters (DNS label limit for portability). Must be unique across all realms.',
+            'Human-readable identifier for administration and UI. Maximum length: 63 characters (DNS label limit for portability). Must be unique across all feedback collections.',
     })
     @Expose()
     @IsString()
     @IsNotEmpty()
     @MaxLength(63)
-    public name!: string;
+    declare public name: string;
 
     @ApiProperty({
         required: true,
         example: 'customer-satisfaction',
         maxLength: 64,
         description:
-            'Public key (slug) used for API routing. Used in URL paths: POST /realms/:key/feedbacks. Maximum length: 64 characters. Must be unique across all realms. Should be URL-safe (lowercase, alphanumeric, hyphens/underscores).',
+            'Public key (slug) used for API routing. Used in URL paths: POST /feedbacks/:key/items. Maximum length: 64 characters. Must be unique across all feedback collections. Should be URL-safe (lowercase, alphanumeric, hyphens/underscores).',
     })
     @Expose()
     @IsString()
     @IsNotEmpty()
     @MaxLength(64)
-    public key!: string;
+    declare public key: string;
 
     @ApiProperty({
         required: false,
@@ -47,7 +58,7 @@ export class BaseRealmDto {
     @IsString()
     @IsOptional()
     @MaxLength(255)
-    public description?: string;
+    declare public description?: string;
 
     @ApiProperty({
         required: true,
@@ -62,7 +73,7 @@ export class BaseRealmDto {
     })
     @Expose()
     @ValidateNested()
-    @Type(() => ScaleDto, {
+    @Type(() => ScaleModel, {
         discriminator: {
             property: 'type',
             subTypes: [
@@ -74,7 +85,7 @@ export class BaseRealmDto {
     })
     @IsObject()
     @IsNotEmpty()
-    public scale!: ScaleDto;
+    declare public scale: NumericScaleDto | EnumScaleDto;
 
     @ApiProperty({
         required: false,
@@ -91,5 +102,5 @@ export class BaseRealmDto {
     @Expose()
     @IsObject()
     @IsOptional()
-    public metadata?: Record<string, unknown>;
+    declare public metadata?: Record<string, unknown>;
 }
