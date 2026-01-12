@@ -128,6 +128,7 @@ You may choose either license for your use case.
 
 ## Documentation
 
+- **[Architecture Overview](./docs/ARCHITECTURE_OVERVIEW.md)** – Architecture decisions, benefits, and business value (for founders and investors)
 - **[Configuration Guide](./docs/CONFIGURATION.md)** – Detailed configuration options
 - **[Docker Deployment](./docs/DOCKER.md)** – Docker setup and deployment
 - **[Development Guide](./docs/DEVELOPMENT.md)** – Development workflow and guidelines
