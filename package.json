@@ -94,7 +94,8 @@
       "/node_modules/",
       "main.ts",
       "src/config/",
-      "index.ts"
+      "index.ts",
+      "\\.module\\.ts$"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
