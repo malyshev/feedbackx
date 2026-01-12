@@ -174,11 +174,11 @@ This codebase demonstrates how to build an MVP that **doesn't need a rewrite**. 
 
 - Handles millions of rows efficiently with proper indexing
 - Connection pooling prevents resource exhaustion
-- **Reference**: See connection pooling configuration in [`src/app.module.factory.ts`](../src/app.module.factory.ts)
+- **Reference**: See connection pooling configuration in [`src/app.module.factory.ts`](../src/app.module.factory.ts#L87-L105)
 
 **Business Benefit**: Scales from startup to enterprise without expensive migrations.
 
-**Reference**: See database configuration in [`src/config/default.config.ts`](../src/config/default.config.ts) and entity definitions in [`src/feedback/entities/`](../src/feedback/entities/).
+**Reference**: See database configuration in [`src/config/default.config.ts`](../src/config/default.config.ts#L218-L280) and entity definitions in [`src/feedback/entities/`](../src/feedback/entities/).
 
 ---
 
@@ -237,7 +237,7 @@ This codebase demonstrates how to build an MVP that **doesn't need a rewrite**. 
 
 - Validation, transformation, error handling out-of-the-box
 - Swagger/OpenAPI integration (auto-generated API docs)
-- **Reference**: See Swagger setup in [`src/main.ts`](../src/main.ts)
+- **Reference**: See Swagger setup in [`src/main.ts`](../src/main.ts#L29-L53)
 
 **Business Benefit**: Enterprise-grade architecture with startup speed and costs.
 
@@ -415,33 +415,33 @@ A data breach can **destroy a startup**. Beyond financial costs (fines, lawsuits
 
 **1. Input Validation**
 
-- All API inputs validated before processing ([`src/main.ts`](../src/main.ts))
+- All API inputs validated before processing ([`src/main.ts`](../src/main.ts#L60-L67))
 - Prevents injection attacks and malformed data
-- **Reference**: Validation configuration in [`src/main.ts`](../src/main.ts)
+- **Reference**: Global validation pipe configuration in [`src/main.ts`](../src/main.ts#L60-L67)
 
 **2. Authentication & Authorization**
 
-- Constant-time comparison prevents timing attacks ([`src/common/guards/admin-auth.guard.ts`](../src/common/guards/admin-auth.guard.ts))
+- Constant-time comparison prevents timing attacks ([`src/common/guards/admin-auth.guard.ts`](../src/common/guards/admin-auth.guard.ts#L60-L80))
 - Secure API key generation ([`src/feedback/services/create-feedback.service.ts`](../src/feedback/services/create-feedback.service.ts))
-- **Reference**: See [`src/common/guards/admin-auth.guard.ts`](../src/common/guards/admin-auth.guard.ts) for security implementation
+- **Reference**: See admin authentication guard implementation in [`src/common/guards/admin-auth.guard.ts`](../src/common/guards/admin-auth.guard.ts#L60-L80)
 
 **3. Security Headers**
 
-- Helmet middleware configured ([`src/config/default.config.ts`](../src/config/default.config.ts))
+- Helmet middleware configured ([`src/config/default.config.ts`](../src/config/default.config.ts#L133-L196))
 - Protects against common web vulnerabilities
-- **Reference**: Security headers configuration in [`src/config/default.config.ts`](../src/config/default.config.ts)
+- **Reference**: Security headers configuration in [`src/config/default.config.ts`](../src/config/default.config.ts#L133-L196)
 
 **4. Rate Limiting**
 
-- Prevents abuse and DDoS attacks ([`src/config/default.config.ts`](../src/config/default.config.ts))
+- Prevents abuse and DDoS attacks ([`src/config/default.config.ts`](../src/config/default.config.ts#L91-L130))
 - Configurable per environment
-- **Reference**: Rate limiting setup in [`src/config/default.config.ts`](../src/config/default.config.ts)
+- **Reference**: Rate limiting setup in [`src/config/default.config.ts`](../src/config/default.config.ts#L91-L130)
 
 **5. Database Security**
 
 - Parameterized queries (no SQL injection risk)
 - Connection pooling for efficiency
-- **Reference**: Database configuration in [`src/app.module.factory.ts`](../src/app.module.factory.ts)
+- **Reference**: Database configuration and connection pooling in [`src/app.module.factory.ts`](../src/app.module.factory.ts#L61-L107)
 
 **Business Benefits**:
 
@@ -489,7 +489,7 @@ A data breach can **destroy a startup**. Beyond financial costs (fines, lawsuits
 - **Scalability**: Handle growth without proportional cost increases
 - **Cost savings**: $500-$2000/month in cloud costs for typical startup
 
-**Reference**: See [`src/app.module.factory.ts`](../src/app.module.factory.ts) for database optimization and [`Dockerfile`](../Dockerfile) for container optimization.
+**Reference**: See database optimization in [`src/app.module.factory.ts`](../src/app.module.factory.ts#L61-L107) and container optimization in [`Dockerfile`](../Dockerfile).
 
 ---
 
